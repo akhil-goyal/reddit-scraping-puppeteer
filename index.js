@@ -1,4 +1,5 @@
 const puppeteer = require('puppeteer');
+const Sheet = require('./sheet');
 
 const URL = `https://old.reddit.com/r/learnprogramming/comments/4q6tae/i_highly_recommend_harvard_free_online_2016_cs50/`;
 
@@ -15,20 +16,28 @@ const URL = `https://old.reddit.com/r/learnprogramming/comments/4q6tae/i_highly_
 
     await page.goto(URL);
 
-    // let expandButtons = await page.$$('.morecomments');
+    const sheet = new Sheet();
 
-    // while (expandButtons.length) {
+    await sheet.load();
 
-    //     for (let button of expandButtons) {
-    //         await button.click();
-    //         await page.waitForTimeout(500);
-    //     }
+    const title = await page.$eval('.title a', el => el.textContent);
 
-    //     await page.waitForTimeout(1000);
+    const sheetIndex = await sheet.addSheet(title.slice(0, 99), ['points', 'text']);
 
-    //     expandButtons = await page.$$('.morecomments');
+    let expandButtons = await page.$$('.morecomments');
 
-    // }
+    while (expandButtons.length) {
+
+        for (let button of expandButtons) {
+            await button.click();
+            await page.waitForTimeout(500);
+        }
+
+        await page.waitForTimeout(1000);
+
+        expandButtons = await page.$$('.morecomments');
+
+    }
 
     const comments = await page.$$('.entry');
 
@@ -48,7 +57,14 @@ const URL = `https://old.reddit.com/r/learnprogramming/comments/4q6tae/i_highly_
         }
     }
 
-    console.log({ formattedComments });
+    formattedComments.sort((a, b) => {
+        const pointsA = Number(a.points.split(' ')[0]);
+        const pointsB = Number(b.points.split(' ')[0]);
+
+        return pointsA - pointsB;
+    })
+
+    sheet.addRows(formattedComments, sheetIndex);
 
     await browser.close();
 
