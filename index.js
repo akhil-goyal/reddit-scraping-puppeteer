@@ -4,7 +4,7 @@ const URL = `https://old.reddit.com/r/learnprogramming/comments/4q6tae/i_highly_
 
 (async () => {
 
-    const browser = await puppeteer.launch({ headless: false, slowMo: 250 });
+    const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
 
     await page.setViewport({
@@ -15,10 +15,19 @@ const URL = `https://old.reddit.com/r/learnprogramming/comments/4q6tae/i_highly_
 
     await page.goto(URL);
 
-    const expandButtons = await page.$$('.morecomments');
+    let expandButtons = await page.$$('.morecomments');
 
-    for (let button of expandButtons) {
-        await button.click();
+    while (expandButtons.length) {
+
+        for (let button of expandButtons) {
+            await button.click();
+            await page.waitForTimeout(500);
+        }
+
+        await page.waitForTimeout(1000);
+
+        expandButtons = await page.$$('.morecomments');
+
     }
 
     await browser.close();
