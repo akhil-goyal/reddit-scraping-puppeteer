@@ -5,7 +5,7 @@ const URL = `https://old.reddit.com/r/learnprogramming/comments/4q6tae/i_highly_
 
 (async () => {
 
-    const browser = await puppeteer.launch({ headless: false });
+    const browser = await puppeteer.launch();
     const page = await browser.newPage();
 
     await page.setViewport({
