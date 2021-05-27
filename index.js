@@ -1,11 +1,25 @@
 const puppeteer = require('puppeteer');
 
+const URL = `https://old.reddit.com/r/learnprogramming/comments/4q6tae/i_highly_recommend_harvard_free_online_2016_cs50/`;
+
 (async () => {
 
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({ headless: false, slowMo: 250 });
     const page = await browser.newPage();
-    await page.goto('https://example.com');
-    await page.screenshot({ path: 'example.png' });
+
+    await page.setViewport({
+        width: 1280,
+        height: 960,
+        deviceScaleFactor: 1,
+    });
+
+    await page.goto(URL);
+
+    const expandButtons = await page.$$('.morecomments');
+
+    for (let button of expandButtons) {
+        await button.click();
+    }
 
     await browser.close();
 
